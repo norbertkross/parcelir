@@ -1,4 +1,3 @@
-# terllux
-Reporting App
+# Parcel Delivery App
+Mini Project
 
-coming soon
