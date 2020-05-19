@@ -19,10 +19,10 @@ class LoginBody extends StatefulWidget {
 
 class _LoginBodyState extends State<LoginBody> {
 
-TextEditingController _emailController = TextEditingController();
+TextEditingController _phoneController = TextEditingController();
 TextEditingController _passwordController = TextEditingController();
 
-String get emailCon => _emailController.text;
+String get phonenumber => _phoneController.text;
 String get passCon => _passwordController.text;
 
   bool keepMeInn = true;
@@ -40,7 +40,8 @@ String return_msg_to_show = "";
           loginUser()async{
             print("The IsAdmin: ${widget.isAdmin}");
 // print("The Key TO Send: $theKey");
-          String apiUrl ="$baseUrl/${widget.isAdmin != null?"loginAdmin":"login"}?email=${emailCon.trim()}&password=${passCon.trim()}";
+          String apiUrl ="$baseUrl/login?phonenumber=${phonenumber.trim()}&password=${passCon.trim()}";
+          String apiUrlAdmin ="$baseUrl/loginAdmin?email=${phonenumber.trim()}&password=${passCon.trim()}";
           List responseBody ;
           // print("Loading ......");
           try{
@@ -49,7 +50,7 @@ String return_msg_to_show = "";
           });
 
 
-          var resp = await http.post(Uri.encodeFull(apiUrl),
+          var resp = await http.post(Uri.encodeFull(widget.isAdmin != null? apiUrlAdmin:apiUrl),
           //body: postData
           headers: {
           "Accept":"application/json",
@@ -62,16 +63,28 @@ String return_msg_to_show = "";
                 if(resp.body != null){
                   // print("not null");
                 responseBody = jsonDecode(resp.body);
-                // print("results \n::$responseBody");
+                 print("results \n::$responseBody");
                 setState(() {
                   isLoading = false;
                 return_msg_to_show = responseBody.length == 0?"INCORRECT CREDENTIALS":"LOGIN SUCCESSFUL";
                   // print("The Length of the list: ${responseBody.length}");
                 });
+                //print("The Res Body: $responseBody");
                 if(responseBody.length > 0 ){
                   if(widget.isAdmin != null){
                     SharedPreferences prefs = await _prefs;
                      prefs.setString('iamadmin',"yes") ;
+                    //  prefs.setString('iamadmin',"yes") ;
+                  }else{
+                    print(responseBody[0]["phonenumber"]);
+                    print(responseBody[0]["email"]);
+                    print(responseBody[0]["name"]);
+                    print(responseBody[0]["userid"]);
+                    SharedPreferences prefs = await _prefs;
+                     prefs.setString('myphonenumber',"${responseBody[0]["phonenumber"]}") ;
+                     prefs.setString('email',"${responseBody[0]["email"]}") ;
+                     prefs.setString('name',"${responseBody[0]["name"]}") ;
+                     prefs.setString('userid',"${responseBody[0]["userid"]}") ;
                   }
                   print("Logged In Successfully");
                 }
@@ -106,36 +119,51 @@ String return_msg_to_show = "";
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-          body: Container(
-         child:                Column(
-                   children: <Widget>[
-                    //  SizedBox(
-                    //    height: 20,
-                    //  ),
-                     SizedBox(
-                       height:MediaQuery.of(context).orientation == 
-                       Orientation.landscape?50:100,
-                       width: 100,
-                       child: 
-                       CircleAvatar(
-                         backgroundColor: Colors.red.withOpacity(.0),
-                      child: 
-                       ClipRRect(
-                         borderRadius: BorderRadius.circular(200),
-                         child: Image.asset("${ServeGlobal.imgUrl}"),
-                         ),
-                         ),
-                       ),
-
+    return 
+    // Scaffold(
+    //       body:
+           Container(
+         child: Material(
+           color: widget.isAdmin == true?Colors.white: Colors.white.withOpacity(.0),
+                    child: Column(
+                     children: <Widget>[
                       //  SizedBox(
-                      //    height: 50,
+                      //    height: 20,
                       //  ),
+
+                      
+                      Row(
+                    mainAxisAlignment: MainAxisAlignment.start,                        
+                      children: [
+                        widget.isAdmin !=null?IconButton(icon: Icon(Icons.close),
+                           onPressed: (){
+                            Navigator.of(context).pop();
+                          }) : Container()
+                        ],
+                      ),
+                       SizedBox(
+                         height:MediaQuery.of(context).orientation == 
+                         Orientation.landscape?50:100,
+                         width: 100,
+                         child: 
+                         CircleAvatar(
+                           backgroundColor: Colors.red.withOpacity(.0),
+                        child: 
+                         ClipRRect(
+                           borderRadius: BorderRadius.circular(200),
+                           child: Image.asset("${ServeGlobal.imgUrl}"),
+                           ),
+                           ),
+                         ),
+
+                        //  SizedBox(
+                        //    height: 50,
+                        //  ),
       Padding(
       padding: const EdgeInsets.all(10.0),
       child: TextField(   
-        controller: _emailController, 
-      decoration: InputDecoration(labelText: '    email   ',
+        controller: _phoneController, 
+      decoration: InputDecoration(labelText: '    ${widget.isAdmin != null?"email":"Phone Number"}   ',
  border: OutlineInputBorder(
       borderSide: BorderSide(
        color: Colors.red, 
@@ -154,11 +182,11 @@ SizedBox(height: 10,),
       decoration: InputDecoration(labelText: 'password',
       suffixIcon: GestureDetector(
         onTap: (){
-          setState(() {
-            obscured = !obscured;
-          });
+            setState(() {
+              obscured = !obscured;
+            });
         },
-              child: obscured == true? Icon(Icons.visibility_off,color: Colors.white,) : Icon(Icons.visibility,color: Colors.white,) ,
+                child: obscured == true? Icon(Icons.visibility_off,color: Colors.white,) : Icon(Icons.visibility,color: Colors.white,) ,
 
       ),    
  border: OutlineInputBorder(
@@ -174,7 +202,7 @@ widget.isAdmin == null? Table(children: [
   TableRow(children: [
       Checkbox(value: keepMeInn,checkColor: Colors.red,activeColor: Colors.white, onChanged: (retVal){
         setState(() {
-          keepMeInn = retVal;
+            keepMeInn = retVal;
         });
       }),
       Text("\nRemember me",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
@@ -183,67 +211,70 @@ widget.isAdmin == null? Table(children: [
 ]):Container(),
 SizedBox(height: 30,),
 
-            CupertinoButton(
-              borderRadius: BorderRadius.circular(30),
-              color: Colors.white,
-              child: isLoading == true? CircularProgressIndicator():
-               Text(" Login    "
-              ,style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),
-              ), onPressed: (){
+              CupertinoButton(
+                borderRadius: BorderRadius.circular(30),
+                color: Colors.white,
+                child: isLoading == true? CircularProgressIndicator():
+                 Text(" Login    "
+                ,style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),
+                ), onPressed: (){
 
-                  if(emailCon.isNotEmpty && passCon.isNotEmpty){
-                   
-                    // print("showing indicator");
-                   setState(() {
-                      isLoading = !isLoading;
-                   });
-                    loginUser().then((repsRes)async{
+                    if(phonenumber.isNotEmpty && passCon.isNotEmpty){
+                     
+                      // print("showing indicator");
+                     setState(() {
+                        isLoading = !isLoading;
+                     });
+                      loginUser().then((repsRes)async{
 
 // print("The Response $repsRes");
-                      if(repsRes == null){
-
-                Navigator.of(context).push(
-                PageRouteBuilder( opaque: false,pageBuilder: (BuildContext context,___, __){
-                          return BaseAlertDialog(
-                            yes: "OK",
-                            content: "$return_msg_to_show",
-                            noOnPressed: (){Navigator.pop(context);},
-                            title: "@ Login",
-                            yesOnPressed: (){Navigator.pop(context);},
-                          );
-                        }                      
-                  ));
-                      }else{
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>MyItems()));
-
-                      }
-                    });
-                   //return_msg_to_show ="Something went wrong";
-                  }else{
-
+                        if(repsRes == null){
 
                   Navigator.of(context).push(
-                PageRouteBuilder( opaque: false,pageBuilder: (BuildContext context,___, __){
-                          return BaseAlertDialog(
-                            yes: "OK",
-                            content: "${passCon.isEmpty || emailCon.isEmpty? "Please fill all fields.":""}\n${passCon.isNotEmpty && passCon.length < 6? "Password should be six(6) or more ":""}",
-                            noOnPressed: (){},
-                            title: "@from Parcelir",
-                            yesOnPressed: (){Navigator.pop(context);},
-                          );
-                        }                      
-                  ));
-                  }
+                  PageRouteBuilder( opaque: false,pageBuilder: (BuildContext context,___, __){
+                            return BaseAlertDialog(
+                              yes: "OK",
+                              content: "$return_msg_to_show",
+                              noOnPressed: (){Navigator.pop(context);},
+                              title: "@ Login",
+                              yesOnPressed: (){Navigator.pop(context);},
+                            );
+                          }                      
+                    ));
+                        }else{
+                         Navigator.of(context).push(MaterialPageRoute(builder: (context)=>MyItems()));
+
+                        }
+                      });
+                     //return_msg_to_show ="Something went wrong";
+                    }else{
 
 
-              }),
+                    Navigator.of(context).push(
+                  PageRouteBuilder( opaque: false,pageBuilder: (BuildContext context,___, __){
+                            return BaseAlertDialog(
+                              yes: "OK",
+                              content: "${passCon.isEmpty || phonenumber.isEmpty? "Please fill all fields.":""}\n${passCon.isNotEmpty && passCon.length < 6? "Password should be six(6) or more ":""}",
+                              noOnPressed: (){},
+                              title: "@from Parcelir",
+                              yesOnPressed: (){Navigator.pop(context);},
+                            );
+                          }                      
+                    ));
+                    }
+
+
+                }),
 SizedBox(height: 20,),
-            widget.isAdmin == null?  GestureDetector(onTap: (){},
-              child: Text("Forgot password?",
-              style: TextStyle(color: Colors.white,))):Container(),
-                   ],
-                 ),
-      ),
-    );
+              widget.isAdmin == null?  GestureDetector(onTap: (){},
+                child: Text("Forgot password?",
+                style: TextStyle(color: Colors.white,))):Container(),
+                     ],
+                   ),
+         ),
+      )
+      //,
+      //)
+    ;
   }
 }

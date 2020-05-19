@@ -3,17 +3,17 @@ const loginRouter = express.Router();
 const mysqlConnection = require("../../connect-db/connections");
 
 
-loginRouter.post("/login",(req,res,err)=>{
+loginRouter.post("/login",(req,res)=>{
   // Get Names From The Requested Data In Post
 
-  var email = req.query.email
+  var phonenumber = req.query.phonenumber
   var password = req.query.password
 
 
   console.log(password);
 
 
-  mysqlConnection.query(`SELECT * FROM Users WHERE email = '${email}' AND password = '${password}'`,
+  mysqlConnection.query(`SELECT * FROM Users WHERE phonenumber = '${phonenumber}' AND password = '${password}'`,
       (err,rows,cols)=>{
          if(!err){
            console.log("before rows pass");
@@ -21,7 +21,7 @@ loginRouter.post("/login",(req,res,err)=>{
            //  console.log(`userid: ${rows[0].userid}  length ${rows.length }`);
            if(rows.length == 1 ){
 
-             var userid = rows[0].userid;
+             //var userid = rows[0].userid;
              // *703# 0277783408
 //Insert The User Computer Details Into UserComputer Table
 //REPLACE INTO usercomputer(computerid,userid) VALUES ('aberorsID Giberish','4')

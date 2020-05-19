@@ -25,6 +25,8 @@ class MyApp extends StatelessWidget {
       IntroScreen()
       //MissingPerson()
       //MyItems()
+      //SendingDetails()
+      //RecievingScreen()
     );
   }
 }

@@ -27,6 +27,8 @@ dependencies:
   socket_io_client: ^0.9.7+2
   http:
   shared_preferences: ^0.5.7+2
+  image_picker: ^0.6.6+1
+  toast: ^0.1.5
 
 dev_dependencies:
   flutter_test:

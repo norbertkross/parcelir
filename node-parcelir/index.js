@@ -6,7 +6,12 @@ var cors = require('cors')
 const register = require('./http-requests/login-sign-up/signUpRequest')
 const login = require('./http-requests/login-sign-up/loginUser')
 const adminlogin = require('./http-requests/login-sign-up/loginAdmin')
+const sendDeliveryDetails = require('./http-requests/sendRecieve/sendDelivery')
+const recieveDeliveryDetails = require('./http-requests/sendRecieve/recieveItems')
+const getAllUserTrans = require('./http-requests/UserTrans/getAllUserTrans')
 
+
+app.use('/art-head', express.static(__dirname+'/uploads/'));
 
 app.use(cors())
 app.get('/', (req, res,err) => {
@@ -28,6 +33,15 @@ app.get('/', (req, res,err) => {
         app.use(login)
         
         app.use(adminlogin)
+
+        app.use(sendDeliveryDetails)
+
+        app.use(recieveDeliveryDetails)
+
+        app.use(getAllUserTrans)
+
+
+ 
 
 
 
